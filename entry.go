@@ -10,7 +10,7 @@ import (
 func RockPickEntry(c *cli.Context) error {
 	database := c.String("database")
 
-	if database == nil || database == "" {
+	if database == "" {
 		return errors.New("No database was provided.")
 	}
 
@@ -24,7 +24,7 @@ func RockPickEntry(c *cli.Context) error {
 	}
 
 	switch query {
-	case nil || "":
+	case "":
 		return displayAll(db)
 	default:
 		return nil
@@ -39,4 +39,6 @@ func displayAll(db *gorocksdb.DB) error {
 	for iter.SeekToFirst(); iter.Valid(); iter.Next() {
 		fmt.Println(iter.Key(), iter.Value())
 	}
+
+	return nil
 }
