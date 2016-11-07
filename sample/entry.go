@@ -3,8 +3,9 @@ package sample
 import (
 	"github.com/urfave/cli"
 	"io/ioutil"
-	"github.com/chris-tomich/rock-pick/sample/json"
+	sample "github.com/chris-tomich/rock-pick/sample/json"
 	"fmt"
+	"encoding/json"
 )
 
 func BuildSampleDbEntry(c *cli.Context) error {
@@ -15,16 +16,24 @@ func BuildSampleDbEntry(c *cli.Context) error {
 		return err
 	}
 
-	var people *json.People
+	var people *sample.People
 
-	people, err = json.LoadPeople(data)
+	people, err = sample.LoadPeople(data)
 
 	if err != nil {
 		return err
 	}
 
+	
+
 	for _, person := range people.People {
-		fmt.Println(person)
+		personJson, err := json.Marshal(person)
+
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Println(string(personJson))
 	}
 
 	return nil
