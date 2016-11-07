@@ -1,7 +1,6 @@
 package rockpick
 
 import (
-	"github.com/urfave/cli"
 	"github.com/tecbot/gorocksdb"
 	"errors"
 	"fmt"
@@ -10,24 +9,20 @@ import (
 	sampleJson "github.com/chris-tomich/rock-pick/sample/json"
 )
 
-func RockPickEntry(c *cli.Context) error {
-	database := c.String("database")
-
-	if database == "" {
+func QueryEntry(databasePath string, query string) error {
+	if databasePath == "" {
 		return errors.New("No database was provided.")
 	}
 
-	query := c.String("query")
-
 	opts := gorocksdb.NewDefaultOptions()
-	db, openErr := gorocksdb.OpenDb(opts, database)
+	db, openErr := gorocksdb.OpenDb(opts, databasePath)
 
 	if openErr != nil {
 		return openErr
 	}
 
 	switch query {
-	case "":
+	case "*":
 		return displayAll(db)
 	default:
 		return nil

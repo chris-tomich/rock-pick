@@ -1,7 +1,6 @@
-package sample
+package rockpick
 
 import (
-	"github.com/urfave/cli"
 	"io/ioutil"
 	sampleJson "github.com/chris-tomich/rock-pick/sample/json"
 	"fmt"
@@ -10,9 +9,8 @@ import (
 	"github.com/satori/go.uuid"
 )
 
-func BuildSampleDbEntry(c *cli.Context) error {
-	filepath := c.String("json")
-	data, err := ioutil.ReadFile(filepath)
+func BulkUploadEntry(databasePath string, filePath string) error {
+	data, err := ioutil.ReadFile(filePath)
 
 	if err != nil {
 		return err
@@ -25,8 +23,6 @@ func BuildSampleDbEntry(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-
-	databasePath := c.String("database")
 
 	opts := gorocksdb.NewDefaultOptions()
 	opts.SetCreateIfMissing(true)

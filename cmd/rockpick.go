@@ -19,7 +19,25 @@ func main() {
 			Name: "query, q",
 			Usage: "The keys to display",
 		},
+		cli.StringFlag{
+			Name: "file, f",
+			Usage: "Location of the data file to use for a bulk upload",
+		},
 	}
-	app.Action = rockpick.RockPickEntry
+	app.Action = RockPickEntry
 	app.Run(os.Args)
+}
+
+func RockPickEntry(c *cli.Context) error {
+	databasePath := c.String("database")
+	query := c.String("query")
+	filePath := c.String("file")
+
+	if query != "" {
+		return rockpick.QueryEntry(databasePath, query)
+	} else if filePath != "" {
+		return rockpick.BulkUploadEntry(databasePath, filePath)
+	} else {
+		return nil
+	}
 }
