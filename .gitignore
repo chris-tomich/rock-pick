@@ -27,4 +27,4 @@ _testmain.go
 *.test
 *.prof
 
-cmd/dbs/*
+sampleDbs/*

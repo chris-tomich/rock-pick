@@ -3,9 +3,11 @@ package sample
 import (
 	"github.com/urfave/cli"
 	"io/ioutil"
-	sample "github.com/chris-tomich/rock-pick/sample/json"
+	sampleJson "github.com/chris-tomich/rock-pick/sample/json"
 	"fmt"
 	"encoding/json"
+	"github.com/tecbot/gorocksdb"
+	"github.com/satori/go.uuid"
 )
 
 func BuildSampleDbEntry(c *cli.Context) error {
@@ -16,22 +18,49 @@ func BuildSampleDbEntry(c *cli.Context) error {
 		return err
 	}
 
-	var people *sample.People
+	var people *sampleJson.People
 
-	people, err = sample.LoadPeople(data)
+	people, err = sampleJson.LoadPeople(data)
 
 	if err != nil {
 		return err
 	}
 
-	
+	databasePath := c.String("database")
+
+	opts := gorocksdb.NewDefaultOptions()
+	opts.SetCreateIfMissing(true)
+	defer opts.Destroy()
+
+	var db *gorocksdb.DB
+
+	db, err = gorocksdb.OpenDb(opts, databasePath)
+	defer db.Close()
+
+	if err != nil {
+		return err
+	}
+
+	wo := gorocksdb.NewDefaultWriteOptions()
 
 	for _, person := range people.People {
-		personJson, err := json.Marshal(person)
+		var personJson []byte
+
+		personJson, err = json.Marshal(person)
 
 		if err != nil {
 			panic(err)
 		}
+
+		var personUuid uuid.UUID
+
+		personUuid, err = uuid.FromString(person.UniqueId)
+
+		if err != nil {
+			panic(err)
+		}
+
+		db.Put(wo, personUuid.Bytes(), personJson)
 
 		fmt.Println(string(personJson))
 	}

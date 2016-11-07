@@ -5,6 +5,9 @@ import (
 	"github.com/tecbot/gorocksdb"
 	"errors"
 	"fmt"
+	"github.com/satori/go.uuid"
+	"encoding/json"
+	sampleJson "github.com/chris-tomich/rock-pick/sample/json"
 )
 
 func RockPickEntry(c *cli.Context) error {
@@ -37,7 +40,20 @@ func displayAll(db *gorocksdb.DB) error {
 	iter.SeekToFirst()
 
 	for iter.SeekToFirst(); iter.Valid(); iter.Next() {
-		fmt.Println(iter.Key(), iter.Value())
+		keyBytes := iter.Key().Data()
+		sampleBytes := iter.Value().Data()
+
+		sampleData := new(sampleJson.Person)
+
+		key, err := uuid.FromBytes(keyBytes)
+
+		if err != nil {
+			panic(err)
+		}
+
+		json.Unmarshal(sampleBytes, sampleData)
+
+		fmt.Println(key, *sampleData)
 	}
 
 	return nil
