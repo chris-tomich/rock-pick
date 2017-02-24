@@ -1,9 +1,12 @@
 package main
 
 import (
-	"github.com/urfave/cli"
-	"github.com/chris-tomich/rock-pick"
 	"os"
+	"plugin"
+
+	"github.com/chris-tomich/rock-pick/query"
+	"github.com/sirupsen/logrus"
+	"github.com/urfave/cli"
 )
 
 func main() {
@@ -12,16 +15,16 @@ func main() {
 	app.Usage = "Rock Pick is an extensible CLI tool for querying a RocksDB database"
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
-			Name: "database, d",
+			Name:  "database, d",
 			Usage: "Location of the database to open",
 		},
 		cli.StringFlag{
-			Name: "query, q",
+			Name:  "query, q",
 			Usage: "The keys to display",
 		},
 		cli.StringFlag{
-			Name: "file, f",
-			Usage: "Location of the data file to use for a bulk upload",
+			Name:  "plugin, p",
+			Usage: "Location of the plugin to use",
 		},
 	}
 	app.Action = RockPickEntry
@@ -30,14 +33,14 @@ func main() {
 
 func RockPickEntry(c *cli.Context) error {
 	databasePath := c.String("database")
-	query := c.String("query")
-	filePath := c.String("file")
+	queryPath := c.String("query")
+	pluginLocation := c.String("plugin")
 
-	if query != "" {
-		return rockpick.QueryEntry(databasePath, query)
-	} else if filePath != "" {
-		return rockpick.BulkUploadEntry(databasePath, filePath)
-	} else {
-		return nil
+	p, err := plugin.Open(pluginLocation)
+
+	if err != nil {
+		logrus.Fatal(err)
 	}
+
+	return query.Entry(p, databasePath, queryPath)
 }
